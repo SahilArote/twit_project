@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block title %}
+bolo or suuno
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <!-- Search Card -->
+      <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-dark text-white text-center rounded-top-4">
+          <h2 class="h4 mb-0"><i class="bi bi-search me-2"></i>Find a User</h2>
+        </div>
+        <div class="card-body">
+          <form method="get" action="{% url 'search_user' %}" class="d-flex flex-column flex-sm-row gap-2" role="search" aria-label="User search form">
+            <input type="text" name="q" placeholder="Search by username..." value="{{ query }}" class="form-control" required>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-search"></i> Search
+            </button>
+          </form>
+          {% if query %}
+            <p class="mt-2 text-muted small">Showing results for <strong>"{{ query }}"</strong></p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if user_profile %}
+      <!-- Profile Card -->
+      <div class="card shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-info text-white rounded-top-4">
+          <h3 class="h5 mb-0"><i class="bi bi-person-circle me-2"></i>{{ user_profile.username }}</h3>
+        </div>
+        <div class="card-body">
+          <p><strong>Email:</strong> {{ user_profile.email }}</p>
+        </div>
+      </div>
+
+      <!-- Twits Card -->
+      <div class="card shadow-sm rounded-4">
+        <div class="card-header bg-secondary text-white rounded-top-4">
+          <h3 class="h5 mb-0"><i class="bi bi-chat-dots me-2"></i>Twits</h3>
+        </div>
+        <div class="card-body">
+          {% if user_twits %}
+            <div class="row g-3">
+              {% for twit in user_twits %}
+              <div class="col-12">
+                <div class="border rounded p-3 bg-light">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold"><i class="bi bi-pencil-square me-1"></i>{{ user_profile.username }}</span>
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ twit.created_at|date:"M d, Y H:i" }}</small>
+                  </div>
+                  <p class="mb-2">{{ twit.text }}</p>
+                  {% if twit.photo %}
+                    <img src="{{ twit.photo.url }}" alt="Twit image by {{ user_profile.username }}" class="img-fluid rounded" style="max-height: 300px;">
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center text-muted">
+              <i class="bi bi-emoji-frown me-2"></i>No twits posted yet.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% elif query %}
+      <!-- No User Found Alert -->
+      <div class="alert alert-warning text-center mt-4">
+        <i class="bi bi-exclamation-circle me-2"></i>No user found with username <strong>"{{ query }}"</strong>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

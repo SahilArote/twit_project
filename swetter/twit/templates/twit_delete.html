@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}
+bolo or suuno
+{% endblock %}
+
+{% block content %}
+<h1 class= "text-center "> are you sure to delete</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to delete this twit?</p>
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{% url 'twit_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+
+
+{% endblock %}
+
