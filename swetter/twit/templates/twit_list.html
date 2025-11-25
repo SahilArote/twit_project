@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}
+bolo or suuno
+{% endblock %}
+
+{% block content %}
+<style>
+  .card:hover {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
+  transition: 0.3s ease;
+}
+</style>
+
+<div class="container row gap-4 mt-3 mx-auto" style="background-color: #000; color: #fff; border: 1px solid #000000ff;">
+    {% for twit in twits %}
+    <div class="card text-white" style="width: 18rem; background-color: #000; border: 1px solid #333; border-radius: 10px; margin-bottom: 20px;">
+  <div class="card-body">
+    <h5 class="card-title">{{ twit.user.username }}</h5>
+  </div>
+
+  {% if twit.photo and twit.photo.name %}
+    <img src="{{ twit.photo.url }}" class="card-img-top rounded" alt="Twit image">
+  {% else %}
+    <img src="/static/default.jpg" class="card-img-top rounded" alt="Default image">
+  {% endif %}
+
+  <div class="card-body">
+    <p class="card-text">{{ twit.text }}</p>
+    {% if twit.user == user %}
+      <div class="d-flex gap-2">
+        <a href="{% url 'twit_edit' twit.id %}" class="btn btn-outline-light btn-sm">Edit</a>
+        <a href="{% url 'twit_delete' twit.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+

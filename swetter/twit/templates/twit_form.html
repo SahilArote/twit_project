@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {% if form.instance.pk %}Edit Twit{% else %}Create Twit{% endif %} - Twetter
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-4 text-primary mb-3">
+                <i class="bi bi-twitter"></i>
+                Welcome to Swetter
+            </h1>
+            <div class="card shadow-sm">
+                <div class="card-header twitter-blue text-white text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-{% if form.instance.pk %}pencil-square{% else %}plus-circle{% endif %}"></i>
+                        {% if form.instance.pk %}
+                            Edit Twit
+                        {% else %}
+                            Create New Twit
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label fw-bold">
+                                    {{ field.label }}
+                                </label>
+                                
+                                {% if field.field.widget.input_type == 'textarea' %}
+                                    <textarea 
+                                        class="form-control{% if field.errors %} is-invalid{% endif %}" 
+                                        id="{{ field.id_for_label }}" 
+                                        name="{{ field.name }}"
+                                        rows="4"
+                                        placeholder="What's happening?"
+                                        {% if field.field.required %}required{% endif %}>{{ field.value|default:'' }}</textarea>
+                                {% elif field.field.widget.input_type == 'file' %}
+                                    <input 
+                                        type="file" 
+                                        class="form-control{% if field.errors %} is-invalid{% endif %}" 
+                                        id="{{ field.id_for_label }}" 
+                                        name="{{ field.name }}"
+                                        accept="image/*"
+                                        {% if field.field.required %}required{% endif %}>
+                                {% else %}
+                                    <input 
+                                        type="{{ field.field.widget.input_type }}" 
+                                        class="form-control{% if field.errors %} is-invalid{% endif %}" 
+                                        id="{{ field.id_for_label }}" 
+                                        name="{{ field.name }}"
+                                        value="{{ field.value|default:'' }}"
+                                        {% if field.field.required %}required{% endif %}>
+                                {% endif %}
+                                
+                                {% if field.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in field.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'twit_list' %}" class="btn btn-outline-secondary btn-lg me-md-2">
+                                <i class="bi bi-arrow-left"></i>
+                                Back to Twits
+                            </a>
+                            <button class="btn twitter-blue btn-lg text-white" type="submit">
+                                <i class="bi bi-{% if form.instance.pk %}check-circle{% else %}send{% endif %}"></i>
+                                {% if form.instance.pk %}Update Twit{% else %}Post Twit{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
