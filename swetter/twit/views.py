@@ -82,22 +82,43 @@ def register(request):
     return render(request, 'registration/register.html', {'form': form})
 
 
+
+
+@login_required
+
 def search_user(request):
-    query = request.GET.get("q", "")
-    results = []
+    query = request.GET.get("q", "").strip()
+    user_data_list = []
 
     if query:
         try:
             response = requests.get(SEARCH_API, params={"q": query}, timeout=2)
             if response.status_code == 200:
-                results = response.json()
-        except requests.exceptions.RequestException:
-            results = []
+                data = response.json()
+                results = data.get("results", [])
+                for user_data in results:
+                    username = user_data.get("username")
+                    score = user_data.get("score", 0)
+                    try:
+                        user_obj = User.objects.get(username=username)
+                        user_twits = twit.objects.filter(user=user_obj).order_by('-created_at')[:10]
+                        user_data_list.append({
+                            "user": user_obj,
+                            "twits": user_twits,
+                            "score": score
+                        })
+                    except User.DoesNotExist:
+                        continue
+        except requests.exceptions.RequestException as e:
+            print(f"Search API error: {e}")
 
-    return render(request, "search_result.html", {"results": results, "query": query})
+    # sort by score descending so best matches appear first
+    user_data_list.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-
-
-
+    return render(request, "search_result.html", {
+        "user_data_list": user_data_list,
+        "query": query
+    })
+# ...existing code...
 
 
