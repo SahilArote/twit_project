@@ -5,6 +5,16 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+import requests
+
+
+SEARCH_API = "http://127.0.0.1:5001/search"
+
+def api_users(request):
+    users = list(User.objects.values("username"))
+    return JsonResponse(users, safe=False)
+
 
 
 def index(request):
@@ -71,22 +81,21 @@ def register(request):
 
     return render(request, 'registration/register.html', {'form': form})
 
-@login_required
+
 def search_user(request):
-    query = request.GET.get('q')
-    user_profile = None
-    user_twits = []
+    query = request.GET.get("q", "")
+    results = []
 
     if query:
-        user_profile = User.objects.filter(username__iexact=query).first()
-        if user_profile:
-            user_twits = twit.objects.filter(user=user_profile).order_by('-created_at')
+        try:
+            response = requests.get(SEARCH_API, params={"q": query}, timeout=2)
+            if response.status_code == 200:
+                results = response.json()
+        except requests.exceptions.RequestException:
+            results = []
 
-    return render(request, 'search_result.html', {
-        'user_profile': user_profile,
-        'user_twits': user_twits,
-        'query': query
-    })
+    return render(request, "search_result.html", {"results": results, "query": query})
+
 
 
 
