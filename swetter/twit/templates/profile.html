@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+{% block title %}{{ user_obj.username }}'s Profile{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h2 class="text-info"><i class="bi bi-person-circle me-2"></i>{{ user_obj.username }}'s Profile</h2>
+
+    {% if profile %}
+      <div class="mb-4">
+        {% if profile.profile_photo %}
+          <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="rounded-circle" width="100">
+        {% endif %}
+        <p class="mt-2">{{ profile.bio }}</p>
+      </div>
+    {% else %}
+      <p>No profile info available.</p>
+    {% endif %}
+
+    <h3 class="text-warning"><i class="bi bi-chat-left-text me-2"></i>Twits</h3>
+    <div class="row">
+      {% for twit in twits %}
+        <div class="col-md-6 mb-4">
+          <div class="card bg-dark text-light border-light">
+            <div class="card-body">
+              <p class="card-text">{{ twit.text }}</p>
+              {% if twit.photo %}
+                <img src="{{ twit.photo.url }}" class="img-fluid rounded mt-2">
+              {% endif %}
+              <small class="text-muted">Posted on {{ twit.created_at|date:"M d, Y H:i" }}</small>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>No twits uploaded yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

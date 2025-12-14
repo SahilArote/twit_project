@@ -119,6 +119,19 @@ def search_user(request):
         "user_data_list": user_data_list,
         "query": query
     })
+
+@login_required
+def user_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    profile = getattr(user, "profile", None)  # OneToOne relation
+    twits = twit.objects.filter(user=user).order_by("-created_at")
+
+    return render(request, "profile.html", {
+        "user_obj": user,
+        "profile": profile,
+        "twits": twits,
+    })
+
 # ...existing code...
 
 
