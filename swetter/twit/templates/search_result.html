@@ -5,89 +5,120 @@ Search results - {{ query }}
 {% endblock %}
 
 {% block content %}
+<style>
+  body {
+    background-color: #121212; /* dark background */
+    color: #f1f1f1; /* light text for visibility */
+  }
+  .profile-card {
+    background-color: #1e1e1e;
+    border-radius: .75rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,.6);
+    padding: 1rem;
+  }
+  .profile-card h5 a {
+    color: #00acee; /* Twitter blue for usernames */
+    text-decoration: none;
+  }
+  .profile-card h5 a:hover {
+    text-decoration: underline;
+  }
+  .twit {
+    background-color: #2a2a2a;
+    border-radius: .5rem;
+    padding: .75rem;
+    margin-bottom: .5rem;
+    color: #eaeaea;
+  }
+  .twit .meta {
+    font-size: .85rem;
+    color: #aaa;
+  }
+  .no-results {
+    color: #bbb;
+  }
+</style>
 
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0 text-white">
+      Search results for: <small class="text-muted">{{ query }}</small>
+    </h2>
+    <a href="{% url 'twit_list' %}" class="btn btn-outline-light btn-sm">Back to feed</a>
+  </div>
 
-  <!-- Bootstrap CSS (CDN) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    .profile-card { border-radius: .5rem; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
-    .twit { background:#fff; border-radius:.375rem; padding:.75rem; margin-bottom:.5rem; }
-    .twit .meta { font-size:.85rem; color:#6c757d; }
-    .no-results { color:#777; }
-  </style>
-</head>
-<body class="bg-light">
-  <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2 class="m-0">Search results for: <small class="text-muted">{{ query }}</small></h2>
-      <a href="{% url 'twit_list' %}" class="btn btn-outline-secondary btn-sm">Back to feed</a>
-    </div>
-
-    {% if user_data_list %}
-      <div class="row g-4">
-        {% for item in user_data_list %}
-          <div class="col-12">
-            <div class="card profile-card p-3">
-              <div class="d-flex align-items-start">
-                <div class="me-3">
-                  <!-- avatar placeholder -->
-                  <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+  {% if user_data_list %}
+    <div class="row g-4">
+      {% for item in user_data_list %}
+        <div class="col-12">
+          <div class="profile-card">
+            <div class="d-flex align-items-start">
+              <div class="me-3">
+                <!-- Profile photo -->
+                {% if item.profile and item.profile.profile_photo %}
+                  <img src="{{ item.profile.profile_photo.url }}" 
+                       alt="{{ item.user.username }}'s photo" 
+                       class="rounded-circle border shadow-sm" 
+                       style="width:64px;height:64px;object-fit:cover;">
+                {% else %}
+                  <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" 
+                       style="width:64px;height:64px;">
                     {{ item.user.username|slice:":1"|upper }}
                   </div>
-                </div>
+                {% endif %}
+              </div>
 
-                <div class="flex-grow-1">
-                  <div class="d-flex justify-content-between">
-                    <div>
-                      <h5 class="mb-0">{{ item.user.username }}</h5>
-                      <div class="text-muted small">{{ item.user.email }}</div>
-                      <div class="text-muted small">Joined: {{ item.user.date_joined|date:"M j, Y" }}</div>
-                    </div>
-                    <div class="text-end">
-                      {% if item.score %}
-                        <span class="badge bg-primary">score: {{ item.score }}</span>
-                      {% endif %}
-                    </div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <!-- Clickable username -->
+                    <h5 class="mb-0">
+                      <a href="{% url 'user_profile' username=item.user.username %}">
+                        {{ item.user.username }}
+                      </a>
+                    </h5>
+                    <div class="text-muted small">{{ item.user.email }}</div>
+                    <div class="text-muted small">Joined: {{ item.user.date_joined|date:"M j, Y" }}</div>
                   </div>
-
-                  <hr class="my-2">
-
-                  <h6 class="mb-2">Recent twits</h6>
-                  {% if item.twits %}
-                    <div>
-                      {% for t in item.twits %}
-                        <div class="twit">
-                          <div class="d-flex justify-content-between">
-                            <div>{{ t.content|linebreaksbr }}</div>
-                            <div class="meta text-end">{{ t.created_at|date:"M j, Y H:i" }}</div>
-                          </div>
-                        </div>
-                      {% endfor %}
-                    </div>
-                  {% else %}
-                    <div class="no-results">No twits yet.</div>
-                  {% endif %}
+                  <div class="text-end">
+                    {% if item.score %}
+                      <span class="badge bg-info text-dark">score: {{ item.score }}</span>
+                    {% endif %}
+                  </div>
                 </div>
+
+                <hr class="my-2 border-secondary">
+
+                <h6 class="mb-2 text-light">Recent twits</h6>
+                {% if item.twits %}
+                  <div>
+                    {% for t in item.twits %}
+                      <div class="twit">
+                        <div class="d-flex justify-content-between">
+                          <div>{{ t.content|linebreaksbr }}</div>
+                          <div class="meta text-end">{{ t.created_at|date:"M j, Y H:i" }}</div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="no-results">No twits yet.</div>
+                {% endif %}
               </div>
             </div>
           </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="alert alert-warning">
-        No results found for "<strong>{{ query }}</strong>".
-      </div>
-    {% endif %}
-
-    <div class="mt-4">
-      <a href="{% url 'twit_create' %}" class="btn btn-success">Create twit</a>
-      <a href="{% url 'twit_list' %}" class="btn btn-outline-secondary">View all twits</a>
+        </div>
+      {% endfor %}
     </div>
-  </div>
+  {% else %}
+    <div class="alert alert-warning bg-dark text-light border-light">
+      No results found for "<strong>{{ query }}</strong>".
+    </div>
+  {% endif %}
 
-  <!-- Bootstrap JS (optional) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  <div class="mt-4">
+    <a href="{% url 'twit_create' %}" class="btn btn-success">Create twit</a>
+    <a href="{% url 'twit_list' %}" class="btn btn-outline-light">View all twits</a>
+  </div>
+</div>
 {% endblock %}

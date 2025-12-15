@@ -1,4 +1,7 @@
 {% extends "layout.html" %}
+{% load profile_tags %}
+
+
 
 {% block title %}
 Bolo or Suuno
@@ -59,12 +62,19 @@ body {
 <div class="feed mt-4">
 
   {% for twit in twits %}
+  {% get_profile twit.user as twit_profile %}
   <div class="post-card">
-
-    <!-- Username -->
-    <div class="post-header text-white">
-      {{ twit.user.username }}
+    <div class="post-header text-white d-flex align-items-center">
+      {% if twit_profile and twit_profile.profile_photo %}
+        <img src="{{ twit_profile.profile_photo.url }}" alt="Profile photo" class="rounded-circle me-2" width="40" height="40">
+      {% endif %}
+      <a href="{% url 'user_profile' username=twit.user.username %}" class="nav-link">
+        {{ twit.user.username }}
+      </a>
     </div>
+
+    
+    
 
     <!-- Image -->
     {% if twit.photo and twit.photo.name %}
@@ -76,13 +86,6 @@ body {
     <!-- Caption -->
     <div class="post-body">
       <p class="mb-2">{{ twit.text }}</p>
-
-      {% if twit.user == user %}
-      <div class="post-actions d-flex gap-2">
-        <a href="{% url 'twit_edit' twit.id %}" class="btn btn-outline-light btn-sm">Edit</a>
-        <a href="{% url 'twit_delete' twit.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
-      </div>
-      {% endif %}
     </div>
 
   </div>

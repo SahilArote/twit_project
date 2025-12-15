@@ -2,37 +2,114 @@
 {% block title %}{{ user_obj.username }}'s Profile{% endblock %}
 
 {% block content %}
-  <div class="container">
-    <h2 class="text-info"><i class="bi bi-person-circle me-2"></i>{{ user_obj.username }}'s Profile</h2>
+ <style>
+body {
+  background-color: #000;
+}
 
+/* Feed container */
+.feed {
+  max-width: 500px;
+  margin: auto;
+}
+
+/* Post card */
+.post-card {
+  background-color: #000;
+  border: 1px solid #262626;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+/* Header */
+.post-header {
+  padding: 10px 15px;
+  font-weight: 600;
+  border-bottom: 1px solid #262626;
+}
+
+/* Image */
+.post-img {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+}
+
+/* Caption */
+.post-body {
+  padding: 10px 15px;
+  color: #fff;
+}
+
+/* Buttons */
+.post-actions a {
+  font-size: 14px;
+}
+
+.post-card:hover {
+  box-shadow: 0 0 10px rgba(255,255,255,0.15);
+  transition: 0.3s;
+}
+</style>
+
+  <div class="container">
+  
     {% if profile %}
-      <div class="mb-4">
+    <div class="mb-4 " >
+      <h2 class="text-info d-flex align-items-center">
         {% if profile.profile_photo %}
-          <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="rounded-circle" width="100">
+        <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="rounded-circle me-2" width="40" height="40">
         {% endif %}
+        {{ user_obj.username }}
+      </h2>
+
         <p class="mt-2">{{ profile.bio }}</p>
       </div>
+      {% if user == user_obj %}
+        <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">
+          <i class="bi bi-pencil-square"></i> Edit Profile
+        </a>
+      {% endif %}
     {% else %}
       <p>No profile info available.</p>
+      <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">
+        <i class="bi bi-pencil-square"></i> Create Profile
+      </a>
+    {% endif %}
+</div>
+   
+
+<div class="feed mt-4">
+
+  {% for twit in twits %}
+  <div class="post-card">
+
+    <!-- Username -->
+    <div class="post-header text-white">
+      {{ twit.user.username }}
+    </div>
+
+    <!-- Image -->
+    {% if twit.photo and twit.photo.name %}
+      <img src="{{ twit.photo.url }}" class="post-img" alt="Post image">
+    {% else %}
+      <img src="/static/default.jpg" class="post-img" alt="Default image">
     {% endif %}
 
-    <h3 class="text-warning"><i class="bi bi-chat-left-text me-2"></i>Twits</h3>
-    <div class="row">
-      {% for twit in twits %}
-        <div class="col-md-6 mb-4">
-          <div class="card bg-dark text-light border-light">
-            <div class="card-body">
-              <p class="card-text">{{ twit.text }}</p>
-              {% if twit.photo %}
-                <img src="{{ twit.photo.url }}" class="img-fluid rounded mt-2">
-              {% endif %}
-              <small class="text-muted">Posted on {{ twit.created_at|date:"M d, Y H:i" }}</small>
-            </div>
-          </div>
-        </div>
-      {% empty %}
-        <p>No twits uploaded yet.</p>
-      {% endfor %}
+    <!-- Caption -->
+    <div class="post-body">
+      <p class="mb-2">{{ twit.text }}</p>
+
+      {% if twit.user == user %}
+      <div class="post-actions d-flex gap-2">
+        <a href="{% url 'twit_edit' twit.id %}" class="btn btn-outline-light btn-sm">Edit</a>
+        <a href="{% url 'twit_delete' twit.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+      </div>
+      {% endif %}
     </div>
+
   </div>
+  {% endfor %}
+
+</div>
 {% endblock %}

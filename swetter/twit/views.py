@@ -1,12 +1,18 @@
 from django.shortcuts import render
-from .models import twit
-from .forms import twitForm , UserRegistrationForm
+from .models import *
+from .forms import *
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 import requests
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+from .models import Profile
+
+
 
 
 SEARCH_API = "http://127.0.0.1:5001/search"
@@ -131,6 +137,27 @@ def user_profile(request, username):
         "profile": profile,
         "twits": twits,
     })
+
+
+@login_required
+def edit_profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('user_profile', username=request.user.username)
+    else:
+        form = ProfileForm(instance=profile)
+    return render(request, 'edit_profile.html', {'form': form})
+
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    else:
+        instance.profile.save()
+
 
 # ...existing code...
 
