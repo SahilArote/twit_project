@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<h2>{{ user_obj.username }} is Following</h2>
+<ul>
+  {% for follow in following %}
+    <li>
+      <a href="{% url 'user_profile' username=follow.following.username %}">
+        {{ follow.following.username }}
+      </a>
+    </li>
+  {% empty %}
+    <li>Not following anyone yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

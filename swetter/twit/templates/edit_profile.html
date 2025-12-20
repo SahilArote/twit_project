@@ -1,8 +1,53 @@
-<div class="container">
-  <h2>Edit Profile</h2>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Save Changes</button>
-  </form>
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/edit_profile.css' %}">
+
+<div class="profile-edit-wrapper">
+  <div class="profile-card">
+    <h2 class="profile-title">Edit Profile</h2>
+
+    <form method="post" enctype="multipart/form-data" class="profile-form">
+      {% csrf_token %}
+
+      <!-- Image upload -->
+      <div class="form-group">
+        <label>Profile Image</label>
+
+        <div class="image-preview-wrapper">
+          {% if user.profile.image %}
+            <img id="imagePreview"
+                 src="{{ user.profile.image.url }}"
+                 alt="Profile Image">
+          {% else %}
+            <img id="imagePreview"
+                 src="{% static 'img/default-avatar.png' %}"
+                 alt="Default Avatar">
+          {% endif %}
+        </div>
+
+        <input type="file"
+               name="image"
+               accept="image/*"
+               onchange="previewImage(event)">
+      </div>
+
+      <!-- Bio -->
+      <div class="form-group">
+        <label>Bio</label>
+        <textarea name="bio"
+                  rows="2"
+                  placeholder="Tell something about yourself..."
+                  oninput="autoResize(this)">{{ user.profile.bio }}</textarea>
+      </div>
+
+      <button type="submit" class="btn-save">Save Changes</button>
+    </form>
+  </div>
 </div>
+
+<script src="{% static 'js/edit_profile.js' %}"></script>
+{% endblock %}

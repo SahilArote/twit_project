@@ -125,7 +125,11 @@
       {% if user.is_authenticated %}
       <a href="{% url 'user_profile' user.username %}" class="nav-link"><i class="bi bi-info-circle-fill"></i>Profile</a>
       {% endif %}
+      <a href="{% url 'chat_home' %}" class="nav-link"><i class="bi bi-chat-dots-fill"></i>Chat</a>
+      
+      
     </div>
+
     
     <!-- Main Content -->
     <div class="main-content">

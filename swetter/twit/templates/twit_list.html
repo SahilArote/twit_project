@@ -1,8 +1,6 @@
 {% extends "layout.html" %}
 {% load profile_tags %}
 
-
-
 {% block title %}
 Bolo or Suuno
 {% endblock %}
@@ -26,6 +24,7 @@ body {
   border: 1px solid #262626;
   border-radius: 8px;
   margin-bottom: 30px;
+  overflow: hidden;
 }
 
 /* Header */
@@ -38,14 +37,18 @@ body {
 /* Image */
 .post-img {
   width: 100%;
-  max-height: 450px;
+  height: 450px;
   object-fit: cover;
+  display: block;
 }
 
 /* Caption */
 .post-body {
   padding: 10px 15px;
   color: #fff;
+  max-height: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Buttons */
@@ -60,37 +63,36 @@ body {
 </style>
 
 <div class="feed mt-4">
-
   {% for twit in twits %}
-  {% get_profile twit.user as twit_profile %}
-  <div class="post-card">
-    <div class="post-header text-white d-flex align-items-center">
-      {% if twit_profile and twit_profile.profile_photo %}
-        <img src="{{ twit_profile.profile_photo.url }}" alt="Profile photo" class="rounded-circle me-2" width="40" height="40">
+    {% get_profile twit.user as twit_profile %}
+    <div class="post-card">
+      <div class="post-header text-white d-flex align-items-center">
+        {% if twit_profile and twit_profile.profile_photo %}
+          <img src="{{ twit_profile.profile_photo.url }}" alt="Profile photo" class="rounded-circle me-2" width="40" height="40">
+        {% endif %}
+        <a href="{% url 'user_profile' username=twit.user.username %}" class="nav-link">
+          {{ twit.user.username }}
+        </a>
+        {% if request.user.is_authenticated and request.user != twit.user %}
+          {% if twit.user.id in following_ids %}
+            <a href="{% url 'unfollow_user' twit.user.id %}" class="btn btn-sm btn-outline-danger ms-2">Unfollow</a>
+          {% else %}
+            <a href="{% url 'follow_user' twit.user.id %}" class="btn btn-sm btn-outline-primary ms-2">Follow</a>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      {% if twit.photo and twit.photo.name %}
+        <img src="{{ twit.photo.url }}" class="post-img" alt="Post image">
+      {% else %}
+        <img src="/static/default.jpg" class="post-img" alt="Default image">
       {% endif %}
-      <a href="{% url 'user_profile' username=twit.user.username %}" class="nav-link">
-        {{ twit.user.username }}
-      </a>
+
+      <div class="post-body">
+        <p class="mb-2">{{ twit.text }}</p>
+      </div>
     </div>
-
-    
-    
-
-    <!-- Image -->
-    {% if twit.photo and twit.photo.name %}
-      <img src="{{ twit.photo.url }}" class="post-img" alt="Post image">
-    {% else %}
-      <img src="/static/default.jpg" class="post-img" alt="Default image">
-    {% endif %}
-
-    <!-- Caption -->
-    <div class="post-body">
-      <p class="mb-2">{{ twit.text }}</p>
-    </div>
-
-  </div>
   {% endfor %}
-
 </div>
 
 {% endblock %}

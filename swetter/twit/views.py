@@ -29,7 +29,13 @@ def index(request):
 @login_required
 def twit_list(request):
     twits = twit.objects.all().order_by('-created_at')
-    return render(request , 'twit_list.html', {'twits':twits})
+    following_ids = set(Follow.objects.filter(follower=request.user).values_list('following__id', flat=True))
+
+    return render(request, 'twit_list.html', {
+        'twits': twits,
+        'following_ids': following_ids,
+    })
+
 
 @login_required
 def twit_create(request):
@@ -132,10 +138,22 @@ def user_profile(request, username):
     profile = getattr(user, "profile", None)  # OneToOne relation
     twits = twit.objects.filter(user=user).order_by("-created_at")
 
+    # follower/following counts
+    followers_count = user.followers.count()
+    following_count = user.following.count()
+
+    # check if current logged-in user is following this profile
+    is_following = False
+    if request.user.is_authenticated and request.user != user:
+        is_following = Follow.objects.filter(follower=request.user, following=user).exists()
+
     return render(request, "profile.html", {
         "user_obj": user,
         "profile": profile,
         "twits": twits,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_following": is_following,
     })
 
 
@@ -158,6 +176,36 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     else:
         instance.profile.save()
 
+
+
+@login_required
+def follow_user(request, user_id):
+    user_to_follow = get_object_or_404(User, id=user_id)
+    Follow.objects.get_or_create(follower=request.user, following=user_to_follow)
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required
+def unfollow_user(request, user_id):
+    user_to_unfollow = get_object_or_404(User, id=user_id)
+    Follow.objects.filter(follower=request.user, following=user_to_unfollow).delete()
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+def followers_list(request, username):
+    user_obj = get_object_or_404(User, username=username)
+    followers = user_obj.followers.select_related('follower')
+    return render(request, 'followers_list.html', {
+        'user_obj': user_obj,
+        'followers': followers,
+    })
+
+def following_list(request, username):
+    user_obj = get_object_or_404(User, username=username)
+    following = user_obj.following.select_related('following')
+    return render(request, 'following_list.html', {
+        'user_obj': user_obj,
+        'following': following,
+    })
 
 # ...existing code...
 

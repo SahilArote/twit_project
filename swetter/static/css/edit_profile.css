@@ -1,0 +1,116 @@
+/* Image preview */
+.image-preview-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.image-preview-wrapper img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+/* File input */
+.profile-form input[type="file"] {
+  width: 100%;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+/* Bio textarea */
+.profile-form textarea {
+  width: 100%;
+  resize: none; /* disable manual resize */
+  min-height: 42px; /* NOT big initially */
+  max-height: 200px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-y: hidden; /* hide scrollbar */
+}
+
+ .profile-edit-wrapper {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.profile-card {
+  background: #ffffffff;
+  width: 100%;
+  max-width: 520px;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  color: #222;
+}
+
+.profile-title {
+  text-align: center;
+  margin-bottom: 25px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* Django form fields */
+.profile-form p {
+  margin-bottom: 16px;
+}
+
+.profile-form label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+  color: #000000ff;
+}
+
+.profile-form input,
+.profile-form select,
+.profile-form textarea {
+  width: 100%;
+  height: inherit;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #000000ff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.profile-form input:focus,
+.profile-form textarea:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+}
+
+/* Save button */
+.btn-save {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: #000000ff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.35);
+}
+
+.btn-save:active {
+  transform: translateY(0);
+  box-shadow: none;
+}

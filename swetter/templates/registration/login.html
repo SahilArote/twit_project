@@ -1,4 +1,7 @@
 {% extends "interface.html" %}
+{% load static %}
+{% load socialaccount %}
+
 
 
 {% block title %}
@@ -54,11 +57,16 @@ Login
             <i class="bi bi-box-arrow-in-right me-2"></i>Log in
           </button>
         </form>
+        
+
+
       
-          <div class="text-center mt-3">
-          <a href="#" class="btn btn-outline-primary w-100" style="transition: all 0.3s;">
-            <i class="bi bi-facebook me-2"></i>Log in with Facebook
-          </a>
+        <div class="text-center mt-3">
+          <a href="{% provider_login_url 'google' process='login' %}" 
+          class="btn btn-outline-danger w-100" style="transition: all 0.3s;">
+          <i class="bi bi-google"></i> Log in with Google
+        </a>
+
           <a href="{% url 'password_reset' %}" class="d-block mt-2 text-decoration-none text-dark ">Forgot password?</a>
         </div>
         </div>

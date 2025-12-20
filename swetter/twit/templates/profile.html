@@ -62,6 +62,24 @@ body {
         {% endif %}
         {{ user_obj.username }}
       </h2>
+     <p>
+  <a href="{% url 'followers_list' user_obj.username %}">
+    Followers: {{ followers_count }}
+  </a>
+</p>
+<p>
+  <a href="{% url 'following_list' user_obj.username %}">
+    Following: {{ following_count }}
+  </a>
+</p>
+{% if request.user != user_obj %}
+  <p>
+    <a href="{% url 'chat' user_obj.username %}" class="btn btn-sm btn-outline-primary">
+      messages
+    </a>
+  </p>
+{% endif %}
+
 
         <p class="mt-2">{{ profile.bio }}</p>
       </div>

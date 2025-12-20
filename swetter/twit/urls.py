@@ -14,6 +14,11 @@ urlpatterns = [
     path('api/users/', api_users, name='api_users' ),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path("profile/<str:username>/", views.user_profile, name="user_profile"),
+    path('follow/<int:user_id>/', views.follow_user, name='follow_user'),
+    path('unfollow/<int:user_id>/', views.unfollow_user, name='unfollow_user'),
+    path('profile/<str:username>/followers/', views.followers_list, name='followers_list'),
+    path('profile/<str:username>/following/', views.following_list, name='following_list'),
+
     
 
 ]
