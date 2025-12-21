@@ -2,132 +2,138 @@
 {% block title %}{{ user_obj.username }}'s Profile{% endblock %}
 
 {% block content %}
- <style>
+<style>
 body {
   background-color: #000;
-}
-
-/* Feed container */
-.feed {
-  max-width: 500px;
-  margin: auto;
-}
-
-/* Post card */
-.post-card {
-  background-color: #000;
-  border: 1px solid #262626;
-  border-radius: 8px;
-  margin-bottom: 30px;
-}
-
-/* Header */
-.post-header {
-  padding: 10px 15px;
-  font-weight: 600;
-  border-bottom: 1px solid #262626;
-}
-
-/* Image */
-.post-img {
-  width: 100%;
-  max-height: 450px;
-  object-fit: cover;
-}
-
-/* Caption */
-.post-body {
-  padding: 10px 15px;
   color: #fff;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* Buttons */
-.post-actions a {
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px 20px;
+  flex-wrap: wrap;
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 250px;
+}
+
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #333;
+}
+
+.username {
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verified-badge {
+  color: #0af;
+  font-size: 18px;
+}
+
+.name {
+  font-size: 16px;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+.bio {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.stats {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+.stats div {
+  text-align: center;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.actions a {
   font-size: 14px;
 }
 
-.post-card:hover {
-  box-shadow: 0 0 10px rgba(255,255,255,0.15);
-  transition: 0.3s;
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  padding: 20px;
+}
+
+.post-grid img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #222;
 }
 </style>
 
-  <div class="container">
-  
-    {% if profile %}
-    <div class="mb-4 " >
-      <h2 class="text-info d-flex align-items-center">
-        {% if profile.profile_photo %}
-        <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="rounded-circle me-2" width="40" height="40">
-        {% endif %}
+<div class="container">
+  <div class="profile-header">
+    <div class="profile-info">
+      <div class="username">
         {{ user_obj.username }}
-      </h2>
-     <p>
-  <a href="{% url 'followers_list' user_obj.username %}">
-    Followers: {{ followers_count }}
-  </a>
-</p>
-<p>
-  <a href="{% url 'following_list' user_obj.username %}">
-    Following: {{ following_count }}
-  </a>
-</p>
-{% if request.user != user_obj %}
-  <p>
-    <a href="{% url 'chat' user_obj.username %}" class="btn btn-sm btn-outline-primary">
-      messages
-    </a>
-  </p>
-{% endif %}
-
-
-        <p class="mt-2">{{ profile.bio }}</p>
+        {% if profile.verified %}
+          <span class="verified-badge">✔</span>
+        {% endif %}
       </div>
-      {% if user == user_obj %}
-        <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">
-          <i class="bi bi-pencil-square"></i> Edit Profile
-        </a>
-      {% endif %}
-    {% else %}
-      <p>No profile info available.</p>
-      <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">
-        <i class="bi bi-pencil-square"></i> Create Profile
-      </a>
-    {% endif %}
-</div>
-   
-
-<div class="feed mt-4">
-
-  {% for twit in twits %}
-  <div class="post-card">
-
-    <!-- Username -->
-    <div class="post-header text-white">
-      {{ twit.user.username }}
+      <div class="name">{{ profile.name }}</div>
+      <div class="bio">{{ profile.bio }}</div>
+      <div class="stats">
+        <div>Posts<br>{{ twits|length }}</div>
+        <div>Followers<br>{{ followers_count }}</div>
+        <div>Following<br>{{ following_count }}</div>
+      </div>
+      <div class="actions">
+        {% if request.user != user_obj %}
+          <a href="{% url 'follow_user' user_obj.id %}" class="btn btn-outline-light btn-sm">Follow</a>
+          <a href="{% url 'chat' user_obj.username %}" class="btn btn-outline-primary btn-sm">Message</a>
+        {% else %}
+          <a href="{% url 'edit_profile' %}" class="btn btn-outline-light btn-sm">Edit Profile</a>
+        {% endif %}
+      </div>
     </div>
-
-    <!-- Image -->
-    {% if twit.photo and twit.photo.name %}
-      <img src="{{ twit.photo.url }}" class="post-img" alt="Post image">
-    {% else %}
-      <img src="/static/default.jpg" class="post-img" alt="Default image">
-    {% endif %}
-
-    <!-- Caption -->
-    <div class="post-body">
-      <p class="mb-2">{{ twit.text }}</p>
-
-      {% if twit.user == user %}
-      <div class="post-actions d-flex gap-2">
-        <a href="{% url 'twit_edit' twit.id %}" class="btn btn-outline-light btn-sm">Edit</a>
-        <a href="{% url 'twit_delete' twit.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
-      </div>
+    <div>
+      {% if profile.profile_photo %}
+        <img src="{{ profile.profile_photo.url }}" alt="Profile photo" class="profile-photo">
+      {% else %}
+        <img src="/static/default_profile.png" alt="Default profile" class="profile-photo">
       {% endif %}
     </div>
-
   </div>
-  {% endfor %}
 
+  <div class="post-grid">
+    {% for twit in twits %}
+      {% if twit.photo and twit.photo.name %}
+        <img src="{{ twit.photo.url }}" alt="Post image">
+      {% else %}
+        <img src="/static/default.jpg" alt="Default image">
+      {% endif %}
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

@@ -1,20 +1,116 @@
 {% extends "layout.html" %}
-{% block title %}Chat Home{% endblock %}
+{% block title %}Chats{% endblock %}
+
 {% block content %}
-<h2>All Users</h2>
-<ul>
+
+<style>
+  .chat-list {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .chat-card {
+    background: #151922;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: #e6e8ee;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+
+  .chat-card:hover {
+    background: #1c2130;
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: #ffffff;
+  }
+
+  .chat-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .chat-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chat-username {
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+  }
+
+  .chat-lastmsg {
+    font-size: 0.9rem;
+    color: #aab0c0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .no-msg {
+    font-style: italic;
+    color: #6c738a;
+  }
+
+  @media (max-width: 768px) {
+    .chat-card {
+      padding: 12px;
+    }
+
+    .chat-avatar {
+      width: 46px;
+      height: 46px;
+    }
+  }
+</style>
+
+<div class="chat-list mt-4">
+  <h3 class="mb-4 text-white">Chats</h3>
+
   {% for entry in users_with_messages %}
-    <li>
-      <strong>{{ entry.user.username }}</strong>
-      {% if entry.message %}
-        — {{ entry.message.content|truncatechars:50 }}
+    <a href="{% url 'chat' entry.user.username %}" class="chat-card">
+      
+      {% if entry.user.profile.profile_photo %}
+        <img
+          src="{{ entry.user.profile.profile_photo.url }}"
+          alt="{{ entry.user.username }}"
+          class="chat-avatar"
+        >
       {% else %}
-        — No messages yet
+        <img
+          src="https://ui-avatars.com/api/?name={{ entry.user.username|urlencode }}&background=random"
+          alt="{{ entry.user.username }}"
+          class="chat-avatar"
+        >
       {% endif %}
-      <br>
-      <a href="{% url 'chat' entry.user.username %}" class="btn btn-sm btn-outline-primary">Open Chat</a>
-    </li>
+
+      <div class="chat-info">
+        <div class="chat-username">{{ entry.user.username }}</div>
+
+        {% if entry.message %}
+          <div class="chat-lastmsg">
+            {{ entry.message.content|truncatechars:50 }}
+          </div>
+        {% else %}
+          <div class="chat-lastmsg no-msg">
+            No messages yet
+          </div>
+        {% endif %}
+      </div>
+
+    </a>
+  {% empty %}
+    <p class="text-muted">No users available.</p>
   {% endfor %}
-</ul>
+</div>
 
 {% endblock %}

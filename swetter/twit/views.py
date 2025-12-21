@@ -30,10 +30,12 @@ def index(request):
 def twit_list(request):
     twits = twit.objects.all().order_by('-created_at')
     following_ids = set(Follow.objects.filter(follower=request.user).values_list('following__id', flat=True))
+    liked_post_ids = Like.objects.filter(user=request.user).values_list('post_id', flat=True)
 
     return render(request, 'twit_list.html', {
         'twits': twits,
         'following_ids': following_ids,
+        'liked_post_ids': list(liked_post_ids),
     })
 
 
@@ -206,6 +208,41 @@ def following_list(request, username):
         'user_obj': user_obj,
         'following': following,
     })
+
+# views.py
+from django.http import JsonResponse
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(twit, id=post_id)
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+    if not created:
+        like.delete()
+        status = "unliked"
+    else:
+        status = "liked"
+    return JsonResponse({"status": status, "likes_count": post.likes.count()})
+
+@login_required
+def comment_post(request, post_id):
+    post = get_object_or_404(twit, id=post_id)
+    text = request.POST.get("comment")
+    if text:
+        comment = Comment.objects.create(user=request.user, post=post, text=text)
+        return JsonResponse({
+            "status": "ok",
+            "user": comment.user.username,
+            "text": comment.text,
+            "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M")
+        })
+    return JsonResponse({"status": "error"}, status=400)
+
+@login_required
+def share_post(request, post_id, recipient_id):
+    post = get_object_or_404(twit, id=post_id)
+    recipient = get_object_or_404(User, id=recipient_id)
+    Share.objects.create(sender=request.user, recipient=recipient, post=post)
+    return JsonResponse({"status": "shared", "recipient": recipient.username})
 
 # ...existing code...
 

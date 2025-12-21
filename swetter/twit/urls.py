@@ -18,6 +18,10 @@ urlpatterns = [
     path('unfollow/<int:user_id>/', views.unfollow_user, name='unfollow_user'),
     path('profile/<str:username>/followers/', views.followers_list, name='followers_list'),
     path('profile/<str:username>/following/', views.following_list, name='following_list'),
+    path('like/<int:post_id>/', views.like_post, name='like_post'),
+    path('comment/<int:post_id>/', views.comment_post, name='comment_post'),
+    path('share/<int:post_id>/<int:recipient_id>/', views.share_post, name='share_post'),
+
 
     
 

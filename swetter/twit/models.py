@@ -39,5 +39,24 @@ class Follow(models.Model):
     def __str__(self):
         return f"{self.follower.username} follows {self.following.username}"
 
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(twit, on_delete=models.CASCADE, related_name="likes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')  # prevent duplicate likes
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(twit, on_delete=models.CASCADE, related_name="comments")
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class Share(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="shares_sent")
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="shares_received")
+    post = models.ForeignKey(twit, on_delete=models.CASCADE, related_name="shares")
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
