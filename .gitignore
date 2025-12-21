@@ -8,8 +8,7 @@ media/
 .env
 
 # Virtual Environment
-venv/
-env/
+
 
 # IDE
 .vscode/
