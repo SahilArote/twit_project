@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-import uuid
 
 
 
@@ -9,7 +8,7 @@ import uuid
 # Create your models here.
 
 class twit(models.Model):
-
+    id = models.BigAutoField(primary_key=True)
     user =models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(max_length=250)
     photo= models.ImageField(upload_to='photos/', blank=True, null=True)
@@ -18,7 +17,7 @@ class twit(models.Model):
 
 
 def __str__(self):
-    return f'{self.user.username} (User ID: {self.user.id})'
+    return f'{self.user.username} '
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
@@ -26,7 +25,7 @@ class Profile(models.Model):
     profile_photo = models.ImageField(upload_to="profile_photo/", blank=True, null=True)
 
 def __str__(self):
-     return f"{self.user.username} (User ID: {self.user.id})"
+     return f"{self.user.username}'s Profile"
 
 class Follow(models.Model):
     follower = models.ForeignKey(User, related_name="following", on_delete=models.CASCADE)
