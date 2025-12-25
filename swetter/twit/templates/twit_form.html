@@ -5,119 +5,160 @@
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-md-10">
-        <!-- Header -->
-        <div class="text-center mb-4">
-            <h1 class="display-4 text-primary mb-3">
-                <i class="bi bi-twitter"></i>
-                Welcome to Swetter
-            </h1>
-        </div>
+<style>
+  .twit-card {
+    background: #1c1f2e;
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  .twit-card:hover {
+    transform: translateY(-2px);
+  }
+  .twit-header {
+    background: linear-gradient(135deg, #1da1f2, #0d8ddb);
+    color: #fff;
+    padding: 18px;
+    text-align: center;
+  }
+  .twit-header h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.4rem;
+  }
+  .twit-body {
+    padding: 24px;
+  }
+  .form-label {
+    color: #e6e8ee;
+    font-weight: 600;
+  }
+  .form-control {
+    background: #151922;
+    border: 1px solid #2a2f40;
+    color: #e6e8ee;
+    border-radius: 10px;
+  }
+  .form-control:focus {
+    border-color: #1da1f2;
+    box-shadow: 0 0 0 0.2rem rgba(29,161,242,0.25);
+  }
+  .btn-twitter {
+    background: #1da1f2;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+  .btn-twitter:hover {
+    background: #0d8ddb;
+    color: #fff;
+  }
+  .image-preview {
+    max-height: 280px;
+    border-radius: 12px;
+    margin-top: 12px;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+</style>
 
-        <!-- Card -->
-        <div class="card border-0 shadow-lg rounded-4">
-            <div class="card-header twitter-blue text-white text-center rounded-top-4">
-                <h3 class="card-title mb-0">
-                    <i class="bi bi-{% if form.instance.pk %}pencil-square{% else %}plus-circle{% endif %}"></i>
-                    {% if form.instance.pk %}
-                        Edit Twit
-                    {% else %}
-                        Create New Twit
-                    {% endif %}
-                </h3>
+<div class="row justify-content-center mt-4">
+  <div class="col-lg-7 col-md-9">
+    <div class="twit-card">
+      <!-- Header -->
+      <div class="twit-header">
+        <h3>
+          <i class="bi bi-{% if form.instance.pk %}pencil-square{% else %}plus-circle{% endif %}"></i>
+          {% if form.instance.pk %} Edit Twit {% else %} Create New Twit {% endif %}
+        </h3>
+      </div>
+
+      <!-- Body -->
+      <div class="twit-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div class="mb-3">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+
+              {% if field.field.widget.input_type == 'textarea' %}
+                <textarea
+                  class="form-control{% if field.errors %} is-invalid{% endif %}"
+                  id="{{ field.id_for_label }}"
+                  name="{{ field.name }}"
+                  rows="4"
+                  placeholder="What's happening?"
+                  {% if field.field.required %}required{% endif %}>{{ field.value|default:'' }}</textarea>
+
+              {% elif field.field.widget.input_type == 'file' %}
+                <input
+                  type="file"
+                  class="form-control{% if field.errors %} is-invalid{% endif %}"
+                  id="{{ field.id_for_label }}"
+                  name="{{ field.name }}"
+                  accept="image/*"
+                  onchange="previewImage(event)"
+                  {% if field.field.required %}required{% endif %}>
+
+                <img id="imagePreview"
+                     src="{% if form.instance.photo %}{{ form.instance.photo.url }}{% endif %}"
+                     class="image-preview"
+                     style="display:{% if form.instance.photo %}block{% else %}none{% endif %};">
+
+              {% else %}
+                <input
+                  type="{{ field.field.widget.input_type }}"
+                  class="form-control{% if field.errors %} is-invalid{% endif %}"
+                  id="{{ field.id_for_label }}"
+                  name="{{ field.name }}"
+                  value="{{ field.value|default:'' }}"
+                  {% if field.field.required %}required{% endif %}>
+              {% endif %}
+
+              {% if field.errors %}
+                <div class="invalid-feedback">
+                  {% for error in field.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+
+              {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+              {% endif %}
             </div>
+          {% endfor %}
 
-            <div class="card-body p-4">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label fw-bold">
-                                {{ field.label }}
-                            </label>
-
-                            {% if field.field.widget.input_type == 'textarea' %}
-                                <textarea
-                                    class="form-control{% if field.errors %} is-invalid{% endif %}"
-                                    id="{{ field.id_for_label }}"
-                                    name="{{ field.name }}"
-                                    rows="4"
-                                    placeholder="What's happening?"
-                                    {% if field.field.required %}required{% endif %}>{{ field.value|default:'' }}</textarea>
-
-                            {% elif field.field.widget.input_type == 'file' %}
-                                <input
-                                    type="file"
-                                    class="form-control{% if field.errors %} is-invalid{% endif %}"
-                                    id="{{ field.id_for_label }}"
-                                    name="{{ field.name }}"
-                                    accept="image/*"
-                                    onchange="previewImage(event)"
-                                    {% if field.field.required %}required{% endif %}>
-
-                                <!-- Image preview -->
-                                <div class="mt-3 text-center">
-                                    <img id="imagePreview" src="{% if form.instance.photo %}{{ form.instance.photo.url }}{% endif %}"
-                                         class="img-fluid rounded shadow-sm"
-                                         style="max-height: 300px; display: {% if form.instance.photo %}block{% else %}none{% endif %};">
-                                </div>
-
-                            {% else %}
-                                <input
-                                    type="{{ field.field.widget.input_type }}"
-                                    class="form-control{% if field.errors %} is-invalid{% endif %}"
-                                    id="{{ field.id_for_label }}"
-                                    name="{{ field.name }}"
-                                    value="{{ field.value|default:'' }}"
-                                    {% if field.field.required %}required{% endif %}>
-                            {% endif %}
-
-                            {% if field.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in field.errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-
-                    <!-- Buttons -->
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% url 'twit_list' %}" class="btn btn-outline-secondary btn-lg me-md-2">
-                            <i class="bi bi-arrow-left"></i>
-                            Back to Twits
-                        </a>
-                        <button class="btn twitter-blue btn-lg text-white" type="submit">
-                            <i class="bi bi-{% if form.instance.pk %}check-circle{% else %}send{% endif %}"></i>
-                            {% if form.instance.pk %}Update Twit{% else %}Post Twit{% endif %}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+          <!-- Buttons -->
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'twit_list' %}" class="btn btn-outline-light">
+              <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <button class="btn btn-twitter" type="submit">
+              <i class="bi bi-{% if form.instance.pk %}check-circle{% else %}send{% endif %}"></i>
+              {% if form.instance.pk %} Update Twit {% else %} Post Twit {% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Image preview script -->
 <script>
 function previewImage(event) {
-    const input = event.target;
-    const preview = document.getElementById('imagePreview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        }
-        reader.readAsDataURL(input.files[0]);
+  const input = event.target;
+  const preview = document.getElementById('imagePreview');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
     }
+    reader.readAsDataURL(input.files[0]);
+  }
 }
 </script>
 {% endblock %}

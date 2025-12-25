@@ -11,15 +11,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import Profile
+from .forms import ProfileForm
+from django.db.models import Q
+from difflib import get_close_matches
 
 
-
-
-SEARCH_API = "http://127.0.0.1:5001/search"
-
-def api_users(request):
-    users = list(User.objects.values("username"))
-    return JsonResponse(users, safe=False)
 
 
 
@@ -96,43 +92,42 @@ def register(request):
     return render(request, 'registration/register.html', {'form': form})
 
 
-
-
 @login_required
-
 def search_user(request):
     query = request.GET.get("q", "").strip()
     user_data_list = []
 
     if query:
-        try:
-            response = requests.get(SEARCH_API, params={"q": query}, timeout=2)
-            if response.status_code == 200:
-                data = response.json()
-                results = data.get("results", [])
-                for user_data in results:
-                    username = user_data.get("username")
-                    score = user_data.get("score", 0)
-                    try:
-                        user_obj = User.objects.get(username=username)
-                        user_twits = twit.objects.filter(user=user_obj).order_by('-created_at')[:10]
-                        user_data_list.append({
-                            "user": user_obj,
-                            "twits": user_twits,
-                            "score": score
-                        })
-                    except User.DoesNotExist:
-                        continue
-        except requests.exceptions.RequestException as e:
-            print(f"Search API error: {e}")
+        # Step 1: Direct partial match (case-insensitive)
+        users = User.objects.filter(
+            Q(username__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query)
+        )
 
-    # sort by score descending so best matches appear first
-    user_data_list.sort(key=lambda x: x.get("score", 0), reverse=True)
+        # Step 2: Fuzzy match for spelling mistakes
+        if not users.exists():
+            all_usernames = list(User.objects.values_list("username", flat=True))
+            close_matches = get_close_matches(query, all_usernames, n=5, cutoff=0.6)
+            users = User.objects.filter(username__in=close_matches)
+
+        # Step 3: Collect user + twits
+        for user_obj in users:
+            user_twits = twit.objects.filter(user=user_obj).order_by('-created_at')[:10]
+            user_data_list.append({
+                "user": user_obj,
+                "twits": user_twits,
+                "score": len(user_twits)  # simple score based on activity
+            })
+
+        # Step 4: Sort by score (descending)
+        user_data_list.sort(key=lambda x: x.get("score", 0), reverse=True)
 
     return render(request, "search_result.html", {
         "user_data_list": user_data_list,
         "query": query
     })
+
 
 @login_required
 def user_profile(request, username):

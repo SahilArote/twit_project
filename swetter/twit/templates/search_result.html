@@ -1,124 +1,119 @@
 {% extends "layout.html" %}
-
-{% block title %}
-Search results - {{ query }}
-{% endblock %}
+{% block title %}Search Results{% endblock %}
 
 {% block content %}
+
 <style>
-  body {
-    background-color: #121212; /* dark background */
-    color: #f1f1f1; /* light text for visibility */
+  .chat-list {
+    max-width: 900px;
+    margin: 0 auto;
   }
-  .profile-card {
-    background-color: #1e1e1e;
-    border-radius: .75rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,.6);
-    padding: 1rem;
-  }
-  .profile-card h5 a {
-    color: #00acee; /* Twitter blue for usernames */
+
+  .chat-card {
+    background: #151922;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
     text-decoration: none;
+    color: #e6e8ee;
+    transition: background 0.2s ease, transform 0.1s ease;
   }
-  .profile-card h5 a:hover {
-    text-decoration: underline;
+
+  .chat-card:hover {
+    background: #1c2130;
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: #ffffff;
   }
-  .twit {
-    background-color: #2a2a2a;
-    border-radius: .5rem;
-    padding: .75rem;
-    margin-bottom: .5rem;
-    color: #eaeaea;
+
+  .chat-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
   }
-  .twit .meta {
-    font-size: .85rem;
-    color: #aaa;
+
+  .chat-info {
+    flex: 1;
+    min-width: 0;
   }
-  .no-results {
-    color: #bbb;
+
+  .chat-username {
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+  }
+
+  .chat-lastmsg {
+    font-size: 0.9rem;
+    color: #aab0c0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .no-msg {
+    font-style: italic;
+    color: #6c738a;
+  }
+
+  @media (max-width: 768px) {
+    .chat-card {
+      padding: 12px;
+    }
+
+    .chat-avatar {
+      width: 46px;
+      height: 46px;
+    }
   }
 </style>
 
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="m-0 text-white">
-      Search results for: <small class="text-muted">{{ query }}</small>
-    </h2>
-    <a href="{% url 'twit_list' %}" class="btn btn-outline-light btn-sm">Back to feed</a>
-  </div>
+<div class="chat-list mt-4">
+  <h3 class="mb-4 text-white">Search Results for "{{ query }}"</h3>
 
-  {% if user_data_list %}
-    <div class="row g-4">
-      {% for item in user_data_list %}
-        <div class="col-12">
-          <div class="profile-card">
-            <div class="d-flex align-items-start">
-              <div class="me-3">
-                <!-- Profile photo -->
-                {% if item.profile and item.profile.profile_photo %}
-                  <img src="{{ item.profile.profile_photo.url }}" 
-                       alt="{{ item.user.username }}'s photo" 
-                       class="rounded-circle border shadow-sm" 
-                       style="width:64px;height:64px;object-fit:cover;">
-                {% else %}
-                  <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" 
-                       style="width:64px;height:64px;">
-                    {{ item.user.username|slice:":1"|upper }}
-                  </div>
-                {% endif %}
-              </div>
+  {% for entry in user_data_list %}
+    <a href="{% url 'user_profile' entry.user.username %}" class="chat-card">
 
-              <div class="flex-grow-1">
-                <div class="d-flex justify-content-between">
-                  <div>
-                    <!-- Clickable username -->
-                    <h5 class="mb-0">
-                      <a href="{% url 'user_profile' username=item.user.username %}">
-                        {{ item.user.username }}
-                      </a>
-                    </h5>
-                    <div class="text-muted small">{{ item.user.email }}</div>
-                    <div class="text-muted small">Joined: {{ item.user.date_joined|date:"M j, Y" }}</div>
-                  </div>
-                  <div class="text-end">
-                    {% if item.score %}
-                      <span class="badge bg-info text-dark">score: {{ item.score }}</span>
-                    {% endif %}
-                  </div>
-                </div>
+      {% if entry.user.profile.profile_photo %}
+        <img
+          src="{{ entry.user.profile.profile_photo.url }}"
+          alt="{{ entry.user.username }}"
+          class="chat-avatar"
+        >
+      {% else %}
+        <img
+          src="https://ui-avatars.com/api/?name={{ entry.user.username|urlencode }}&background=random"
+          alt="{{ entry.user.username }}"
+          class="chat-avatar"
+        >
+      {% endif %}
 
-                <hr class="my-2 border-secondary">
-
-                <h6 class="mb-2 text-light">Recent twits</h6>
-                {% if item.twits %}
-                  <div>
-                    {% for t in item.twits %}
-                      <div class="twit">
-                        <div class="d-flex justify-content-between">
-                          <div>{{ t.content|linebreaksbr }}</div>
-                          <div class="meta text-end">{{ t.created_at|date:"M j, Y H:i" }}</div>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                {% else %}
-                  <div class="no-results">No twits yet.</div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
+      <div class="chat-info">
+        <div class="chat-username">
+          {{ entry.user.username }}
+          <span style="font-size:0.8rem; color:#6c738a;">(Score: {{ entry.score }})</span>
         </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="alert alert-warning bg-dark text-light border-light">
-      No results found for "<strong>{{ query }}</strong>".
-    </div>
-  {% endif %}
 
-  <div class="mt-4">
-    <a href="{% url 'twit_create' %}" class="btn btn-success">Create twit</a>
-    <a href="{% url 'twit_list' %}" class="btn btn-outline-light">View all twits</a>
-  </div>
+        {% if entry.twits %}
+          <div class="chat-lastmsg">
+            {{ entry.twits.0.content|truncatechars:50 }}
+          </div>
+        {% else %}
+          <div class="chat-lastmsg no-msg">
+            No twits yet
+          </div>
+        {% endif %}
+      </div>
+
+    </a>
+  {% empty %}
+    <p class="text-muted">No users found for "{{ query }}".</p>
+  {% endfor %}
 </div>
+
 {% endblock %}
