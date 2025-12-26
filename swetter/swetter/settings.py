@@ -41,6 +41,19 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 
+from django.contrib.auth import get_user_model
+
+if os.environ.get("CREATE_SUPERUSER") == "1":
+    User = get_user_model()
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="Admin@123"
+        )
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
