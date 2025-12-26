@@ -41,7 +41,6 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 
-from django.contrib.auth import get_user_model
 
 
 
@@ -134,9 +133,15 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+
 DATABASES = {
-    "default": dj_database_url.config(default=os.environ.get("DATABASE_URL"))
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
 }
+
 
 
 
@@ -198,11 +203,3 @@ LOGIN_URL = '/accounts/login'
 LOGIN_REDIRECT_URL = '/twit/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-if os.environ.get("CREATE_SUPERUSER") == "1":
-    User = get_user_model()
-    if not User.objects.filter(username="admin").exists():
-        User.objects.create_superuser(
-            username="admin",
-            email="admin@example.com",
-            password="Admin@123"
-        )
