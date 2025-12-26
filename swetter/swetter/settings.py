@@ -25,7 +25,7 @@ MESSAGE_TAGS = {
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Google OAuth2 Settings
-import os
+
 
 
 # Quick-start development settings - unsuitable for production
