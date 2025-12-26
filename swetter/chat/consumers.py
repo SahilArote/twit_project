@@ -1,11 +1,14 @@
 # chat/consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from twit.models import twit
 from .models import Message
 from asgiref.sync import sync_to_async
+
+
+
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
